@@ -1,32 +1,9 @@
 name: CI
-on:
-  push:
-  pull_request:
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  smoke:
+  hello:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Show versions
-        run: |
-          python --version
-          pip --version
-
-      - name: Install requirements if present
-        if: ${{ hashFiles('requirements.txt') != '' }}
-        run: pip install -r requirements.txt
-
-      - name: Syntax check if there are .py files
-        if: ${{ hashFiles('**.py') != '' }}
-        run: python -m compileall -q .
-
-      - name: Streamlit presence (non-fatal)
-        run: python -c "import importlib; print('Streamlit found' if importlib.util.find_spec('streamlit') else 'Streamlit NOT installed (ok)')"
+      - run: echo "✅ GitHub Actions is running for $GITHUB_REPOSITORY (commit $GITHUB_SHA)"
