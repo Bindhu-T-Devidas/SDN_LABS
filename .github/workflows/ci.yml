@@ -7,3 +7,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: echo "✅ GitHub Actions is running for $GITHUB_REPOSITORY (commit $GITHUB_SHA)"
+
+  python-smoke:
+    runs-on: ubuntu-latest
+    continue-on-error: true   # <-- this job can fail and your run still shows green
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Show versions
+        run: |
+          python --version
+          pip --version
+
+      - name: Install requirements (best-effort)
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt || true
+          else
+            echo "No requirements.txt, skipping"
+          fi
+
+      - name: Syntax check (best-effort)
+        run: |
+          if compgen -G "**/*.py" > /dev/null; then
+            python -m compileall -q . || true
+          else
+            echo "No Python files; skipping compile."
+          fi
+
+      - name: Streamlit smoke (best-effort)
+        run: |
+          python - <<'PY' || true
+          import importlib
+          print("streamlit installed:", bool(importlib.util.find_spec("streamlit")))
+          PY
